@@ -1,16 +1,15 @@
-/**
- * @file StateMachine.h
- * @brief 表驱动式状态机 - 详细注释版
- * 
- * 【什么是表驱动状态机】
- * 把"状态A + 事件X → 状态B"这种跳转规则存成一张表，
- * 触发事件时查表决定跳到哪个状态，而不是写一堆if-else。
- * 
- * 【为什么用它】
- * 1. 加新状态只需加几行规则，不用改其他代码
- * 2. 转移规则集中管理，一目了然
- * 3. 支持进入/退出/更新回调，逻辑分离
- */
+/******************************************************************************
+ *                Automne Robotic Middleware Layer Library                    *
+ *----------------------------------------------------------------------------
+ * 文件    : StateMachine.h
+ * 说明    : 表驱动式状态机
+ * 作者    : Automne
+ * 日期    : 2026-09.27
+ * 版本    : v1.0.0
+ *
+ * @brief   把"状态A + 事件X → 状态B"这种跳转规则存成一张表，触发事件时查表决定跳到哪个状态，
+ *          而不是写一堆if-else
+ ******************************************************************************/
 
 #pragma once
 
@@ -36,9 +35,15 @@
  * fsm.addTransition(IDLE, EVT_START, STAND);
  * fsm.addTransition(STAND, EVT_START, WALK);
  * 
+ * // 循环内部计算时间
+ * fsm.update(dt);	// 更新状态机的时间
+ * 
  * // 触发事件
  * fsm.trigger(EVT_START);  // IDLE → STAND
  * fsm.trigger(EVT_START);  // STAND → WALK
+ * 
+ * // 检查当前事件
+ * if(fsm.isState(IDLE)){ ... }       // IDLE情况下返回bool=1
  * ```
  */
 template <typename StateT, typename EventT>
@@ -312,9 +317,11 @@ private:
         // 2. 更新状态
         prevState_ = currentState_;
         currentState_ = newState;
-        stateTime_ = 0;  // 重置计时器
+
+        // 3. 重置计时器
+        stateTime_ = 0;
         
-        // 3. 调用新状态的进入回调
+        // 4. 调用新状态的进入回调
         auto enterIt = enterCallbacks_.find(static_cast<int>(currentState_));
         if (enterIt != enterCallbacks_.end() && enterIt->second) {
             enterIt->second();
